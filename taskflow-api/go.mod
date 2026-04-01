@@ -1,3 +1,3 @@
-module github.com/Floxtouille/taskflow-popomagico/taskflow-api
+module taskflow-api
 
 go 1.23

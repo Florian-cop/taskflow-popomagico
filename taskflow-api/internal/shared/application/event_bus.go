@@ -3,11 +3,14 @@ package application
 import (
 	"context"
 
-	"github.com/Floxtouille/taskflow-popomagico/taskflow-api/internal/shared/domain"
+	"taskflow-api/internal/shared/domain"
 )
 
-// EventBus est le port de publication des événements métier.
-// L'implémentation (NATS, mémoire, etc.) vit dans infrastructure/.
+// EventHandler est une fonction qui réagit à un événement métier.
+type EventHandler func(ctx context.Context, event domain.DomainEvent) error
+
+// EventBus est le port de publication et d'abonnement aux événements métier.
 type EventBus interface {
 	Publish(ctx context.Context, event domain.DomainEvent) error
+	Subscribe(eventName string, handler EventHandler)
 }

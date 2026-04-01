@@ -3,9 +3,9 @@ package application
 import (
 	"context"
 
-	projectDomain "github.com/Floxtouille/taskflow-popomagico/taskflow-api/internal/project/domain"
-	shared "github.com/Floxtouille/taskflow-popomagico/taskflow-api/internal/shared/application"
-	"github.com/Floxtouille/taskflow-popomagico/taskflow-api/internal/shared/domain"
+	projectDomain "taskflow-api/internal/project/domain"
+	shared "taskflow-api/internal/shared/application"
+	"taskflow-api/internal/shared/domain"
 )
 
 type ProjectService struct {
