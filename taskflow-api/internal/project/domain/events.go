@@ -30,6 +30,7 @@ func (e ProjectCreatedEvent) EventID() string      { return e.id }
 func (e ProjectCreatedEvent) EventName() string     { return "project.created" }
 func (e ProjectCreatedEvent) AggregateID() string   { return e.projectID }
 func (e ProjectCreatedEvent) OccurredAt() time.Time { return e.occurredAt }
+func (e ProjectCreatedEvent) Name() string          { return e.name }
 func (e ProjectCreatedEvent) OwnerID() string       { return e.ownerID }
 
 // --- member.added ---
@@ -54,4 +55,5 @@ func (e MemberAddedEvent) EventID() string      { return e.id }
 func (e MemberAddedEvent) EventName() string     { return "member.added" }
 func (e MemberAddedEvent) AggregateID() string   { return e.projectID }
 func (e MemberAddedEvent) OccurredAt() time.Time { return e.occurredAt }
+func (e MemberAddedEvent) ProjectID() string     { return e.projectID }
 func (e MemberAddedEvent) UserID() string        { return e.userID }
