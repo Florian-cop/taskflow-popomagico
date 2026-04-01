@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	shared "github.com/Floxtouille/taskflow-popomagico/taskflow-api/internal/shared/domain"
+	shared "taskflow-api/internal/shared/domain"
 )
 
 // --- task.created ---
