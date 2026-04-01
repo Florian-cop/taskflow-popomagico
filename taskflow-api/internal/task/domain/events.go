@@ -59,6 +59,7 @@ func (e TaskMovedEvent) EventID() string        { return e.id }
 func (e TaskMovedEvent) EventName() string      { return "task.moved" }
 func (e TaskMovedEvent) AggregateID() string    { return e.taskID }
 func (e TaskMovedEvent) OccurredAt() time.Time  { return e.occurredAt }
+func (e TaskMovedEvent) ProjectID() string      { return e.projectID }
 func (e TaskMovedEvent) FromStatus() TaskStatus { return e.fromStatus }
 func (e TaskMovedEvent) ToStatus() TaskStatus   { return e.toStatus }
 
@@ -86,4 +87,5 @@ func (e TaskAssignedEvent) EventID() string      { return e.id }
 func (e TaskAssignedEvent) EventName() string     { return "task.assigned" }
 func (e TaskAssignedEvent) AggregateID() string   { return e.taskID }
 func (e TaskAssignedEvent) OccurredAt() time.Time { return e.occurredAt }
+func (e TaskAssignedEvent) ProjectID() string     { return e.projectID }
 func (e TaskAssignedEvent) AssigneeID() string    { return e.assigneeID }

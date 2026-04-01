@@ -6,9 +6,12 @@ import (
 )
 
 // NewID génère un identifiant unique (UUID v4) sans dépendance externe.
+// Panic si le générateur aléatoire échoue (ne doit jamais arriver en conditions normales).
 func NewID() string {
 	b := make([]byte, 16)
-	_, _ = rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic(fmt.Sprintf("impossible de générer un ID: %v", err))
+	}
 	b[6] = (b[6] & 0x0f) | 0x40
 	b[8] = (b[8] & 0x3f) | 0x80
 	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
