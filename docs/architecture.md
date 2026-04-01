@@ -9,7 +9,7 @@ taskflow-popomagico/
 ├── taskflow-api/           ← backend Go (DDD + Hexagonal + Event-Driven)
 ├── taskflow-web/           ← frontend Nuxt (Vue.js + Nuxt UI)
 ├── docs/                   ← ADR, architecture, glossaire
-├── docker-compose.yml      ← orchestration : api, web, postgres, nats
+├── docker-compose.yml      ← orchestration : api, web, postgres
 ├── .github/workflows/      ← CI GitHub Actions
 └── .env.example
 ```
@@ -30,7 +30,7 @@ taskflow-api/
 │   ├── notification/                ← contexte "Notification"
 │   ├── audit/                       ← contexte "Audit"
 │   └── shared/                      ← interfaces transversales (EventBus, DomainEvent),
-│                                      adaptateurs partagés (NATS, DB, HTTP, config)
+│                                      adaptateurs partagés (DB, HTTP, config)
 ├── api/
 │   └── v1/                          ← handlers HTTP, DTOs requête/réponse, mappers
 │       ├── handlers/
@@ -73,7 +73,7 @@ Les dépendances pointent toujours vers le centre (le domaine). Jamais l'inverse
 
 ```
   Présentation (api/v1/)     →  Application  →  Domain  ←  Infrastructure
-  (handlers HTTP)               (use cases)     (pur Go)    (GORM, NATS)
+  (handlers HTTP)               (use cases)     (pur Go)    (GORM)
 ```
 
 1. `domain/` n'importe jamais les autres couches
@@ -84,23 +84,22 @@ Les dépendances pointent toujours vers le centre (le domaine). Jamais l'inverse
 
 ## Flux événementiel
 
-Quand un use case fait quelque chose de significatif, il publie un event sur NATS JetStream. Les handlers consomment ces events de manière indépendante et découplée.
+Quand un use case fait quelque chose de significatif, il publie un event sur le bus interne de l'application. Les handlers consomment ces events de manière indépendante et découplée.
 
 ```
-Requête HTTP → Handler → Service → persist en BDD → publie event → NATS JetStream
-                                                                        ↓
-                                                    NotificationHandler / AuditHandler / ConsoleHandler
+Requête HTTP → Handler → Service → persist en BDD → publie event → Bus interne
+                                                                  ↓
+                                              NotificationHandler / AuditHandler / ConsoleHandler
 ```
 
-Un handler qui plante ne fait pas échouer le use case. NATS gère les retries et la dead-letter queue (cf. ADR-003).
+Un handler qui plante ne fait pas échouer le use case. Les retries sont gérés dans l'application (cf. ADR-003).
 
 ## Docker
 
-4 services dans le `docker-compose.yml` :
+3 services dans le `docker-compose.yml` :
 
 | Service | Image | Port |
 |---------|-------|------|
 | `api` | Go multi-stage build | 8080 |
 | `web` | Node.js Alpine | 3000 |
 | `postgres` | postgres:16-alpine | 5432 |
-| `nats` | nats:2-alpine (JetStream) | 4222 |
