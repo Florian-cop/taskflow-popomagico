@@ -1,25 +1,33 @@
 <script setup lang="ts">
 import { useProjects } from '~/composables/useProjects'
 
-const { projects, createProject } = useProjects()
+const { projects, loading, fetchProjects, createProject } = useProjects()
 const toast = useToast()
 
 const showCreateModal = ref(false)
 const newProjectName = ref('')
 const newProjectDescription = ref('')
 
-function handleCreateProject() {
+onMounted(() => {
+  fetchProjects()
+})
+
+async function handleCreateProject() {
   if (!newProjectName.value.trim()) return
 
-  createProject({
-    name: newProjectName.value.trim(),
-    description: newProjectDescription.value.trim()
-  })
+  try {
+    await createProject({
+      name: newProjectName.value.trim(),
+      description: newProjectDescription.value.trim()
+    })
 
-  toast.add({ title: 'Project created', icon: 'i-lucide-check', color: 'success' })
-  newProjectName.value = ''
-  newProjectDescription.value = ''
-  showCreateModal.value = false
+    toast.add({ title: 'Project created', icon: 'i-lucide-check', color: 'success' })
+    newProjectName.value = ''
+    newProjectDescription.value = ''
+    showCreateModal.value = false
+  } catch {
+    toast.add({ title: 'Failed to create project', icon: 'i-lucide-x', color: 'error' })
+  }
 }
 </script>
 
@@ -37,7 +45,11 @@ function handleCreateProject() {
       />
     </div>
 
-    <div v-if="projects.length === 0" class="py-16">
+    <div v-if="loading" class="py-16 text-center">
+      <UIcon name="i-lucide-loader" class="animate-spin size-8 text-muted" />
+    </div>
+
+    <div v-else-if="projects.length === 0" class="py-16">
       <UEmpty
         icon="i-lucide-folder-open"
         title="No projects yet"

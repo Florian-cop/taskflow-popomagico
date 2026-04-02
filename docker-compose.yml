@@ -1,4 +1,17 @@
 services:
+  web:
+    build:
+      context: ./taskflow-web
+      args:
+        NUXT_PUBLIC_API_BASE: http://localhost:8080/api/v1
+    ports:
+      - "3000:3000"
+    environment:
+      NUXT_PUBLIC_API_BASE: http://localhost:8080/api/v1
+    depends_on:
+      - api
+    restart: unless-stopped
+
   api:
     build: ./taskflow-api
     ports:

@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { useProjects } from '~/composables/useProjects'
+import { useTasks } from '~/composables/useTasks'
 
 const route = useRoute()
 const projectId = route.params.id as string
 
-const { getProject } = useProjects()
+const { getProject, fetchProjects } = useProjects()
+const { fetchTasksByProject } = useTasks()
+
 const project = computed(() => getProject(projectId))
+
+onMounted(async () => {
+  await fetchProjects()
+  await fetchTasksByProject(projectId)
+})
 </script>
 
 <template>

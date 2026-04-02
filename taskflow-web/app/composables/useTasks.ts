@@ -3,6 +3,26 @@ import { VALID_TRANSITIONS } from '~/types'
 
 export function useTasks() {
   const tasks = useState<Task[]>('tasks', () => [])
+  const loading = useState<boolean>('tasks-loading', () => false)
+
+  const config = useRuntimeConfig()
+  const apiBase = config.public.apiBase as string
+
+  async function fetchTasksByProject(projectId: string) {
+    loading.value = true
+    try {
+      const data = await $fetch<Task[]>(`${apiBase}/projects/${projectId}/tasks`)
+      // Replace tasks for this project
+      tasks.value = [
+        ...tasks.value.filter(t => t.projectId !== projectId),
+        ...(data ?? [])
+      ]
+    } catch (error) {
+      console.error('[TaskFlow] Failed to fetch tasks:', error)
+    } finally {
+      loading.value = false
+    }
+  }
 
   function getTasksByProject(projectId: string) {
     return computed(() => tasks.value.filter(t => t.projectId === projectId))
@@ -14,33 +34,49 @@ export function useTasks() {
     )
   }
 
-  function createTask(data: { title: string, description: string, projectId: string }) {
-    const now = new Date().toISOString()
-    const task: Task = {
-      id: crypto.randomUUID(),
-      title: data.title,
-      description: data.description,
-      status: 'todo',
-      assigneeId: null,
-      projectId: data.projectId,
-      createdAt: now,
-      updatedAt: now
+  async function createTask(data: { title: string, description: string, projectId: string }) {
+    try {
+      const task = await $fetch<Task>(`${apiBase}/projects/${data.projectId}/tasks`, {
+        method: 'POST',
+        body: { title: data.title, description: data.description }
+      })
+
+      console.log('[TaskFlow] Task created:', task)
+
+      tasks.value.push(task)
+      return task
+    } catch (error) {
+      console.error('[TaskFlow] Failed to create task:', error)
+      throw error
     }
-    tasks.value.push(task)
-    return task
   }
 
-  function moveTask(taskId: string) {
+  async function moveTask(taskId: string) {
     const task = tasks.value.find(t => t.id === taskId)
     if (!task) return
     const next = VALID_TRANSITIONS[task.status]
     if (!next) return
-    task.status = next
-    task.updatedAt = new Date().toISOString()
+
+    try {
+      const updated = await $fetch<Task>(`${apiBase}/tasks/${taskId}/move`, {
+        method: 'PUT',
+        body: { status: next }
+      })
+
+      console.log('[TaskFlow] Task moved:', updated)
+
+      const idx = tasks.value.findIndex(t => t.id === taskId)
+      if (idx !== -1) tasks.value[idx] = updated
+    } catch (error) {
+      console.error('[TaskFlow] Failed to move task:', error)
+      throw error
+    }
   }
 
   return {
     tasks: readonly(tasks),
+    loading: readonly(loading),
+    fetchTasksByProject,
     getTasksByProject,
     getTasksByStatus,
     createTask,

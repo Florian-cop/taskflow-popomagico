@@ -2,38 +2,63 @@ import type { Project } from '~/types'
 
 export function useProjects() {
   const projects = useState<Project[]>('projects', () => [])
+  const loading = useState<boolean>('projects-loading', () => false)
 
-  function createProject(data: { name: string, description: string }) {
-    const now = new Date().toISOString()
-    const project: Project = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      description: data.description,
-      members: [{ userId: 'user-1', role: 'owner', joinedAt: now }],
-      createdAt: now,
-      updatedAt: now
+  const config = useRuntimeConfig()
+  const apiBase = config.public.apiBase as string
+
+  async function fetchProjects() {
+    loading.value = true
+    try {
+      const data = await $fetch<Project[]>(`${apiBase}/projects`)
+      projects.value = data ?? []
+    } catch (error) {
+      console.error('[TaskFlow] Failed to fetch projects:', error)
+    } finally {
+      loading.value = false
     }
-    projects.value.push(project)
-    return project
+  }
+
+  async function createProject(data: { name: string, description: string }) {
+    try {
+      const project = await $fetch<Project>(`${apiBase}/projects`, {
+        method: 'POST',
+        headers: { 'X-User-Id': 'user-1' },
+        body: { name: data.name, description: data.description }
+      })
+
+      console.log('[TaskFlow] Project created:', project)
+
+      projects.value.push(project)
+      return project
+    } catch (error) {
+      console.error('[TaskFlow] Failed to create project:', error)
+      throw error
+    }
   }
 
   function getProject(id: string) {
     return projects.value.find(p => p.id === id)
   }
 
-  function addMember(projectId: string, userId: string) {
-    const project = getProject(projectId)
-    if (!project) return
-    if (project.members.some(m => m.userId === userId)) return
-    project.members.push({
-      userId,
-      role: 'member',
-      joinedAt: new Date().toISOString()
-    })
+  async function addMember(projectId: string, userId: string) {
+    try {
+      const project = await $fetch<Project>(`${apiBase}/projects/${projectId}/members`, {
+        method: 'POST',
+        body: { userId }
+      })
+      const idx = projects.value.findIndex(p => p.id === projectId)
+      if (idx !== -1) projects.value[idx] = project
+    } catch (error) {
+      console.error('[TaskFlow] Failed to add member:', error)
+      throw error
+    }
   }
 
   return {
     projects: readonly(projects),
+    loading: readonly(loading),
+    fetchProjects,
     createProject,
     getProject,
     addMember

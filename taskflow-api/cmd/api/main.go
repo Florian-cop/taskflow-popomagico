@@ -33,8 +33,11 @@ func main() {
 
 	// 3. Event Bus + handlers
 	eventBus := memory.NewInMemoryEventBus()
+	eventBus.Subscribe("project.created", console.Handle)
+	eventBus.Subscribe("member.added", console.Handle)
 	eventBus.Subscribe("task.created", console.Handle)
 	eventBus.Subscribe("task.moved", console.Handle)
+	eventBus.Subscribe("task.assigned", console.Handle)
 
 	// 4. Repositories
 	projectRepo := projectInfra.NewGormProjectRepository(db)

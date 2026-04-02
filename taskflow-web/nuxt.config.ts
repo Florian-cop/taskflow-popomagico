@@ -14,6 +14,12 @@ export default defineNuxtConfig({
     dirs: ['composables']
   },
 
+  runtimeConfig: {
+    public: {
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8080/api/v1'
+    }
+  },
+
   compatibilityDate: '2025-01-15',
 
   eslint: {

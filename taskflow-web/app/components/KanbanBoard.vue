@@ -13,24 +13,32 @@ const showCreateModal = ref(false)
 const newTaskTitle = ref('')
 const newTaskDescription = ref('')
 
-function handleCreateTask() {
+async function handleCreateTask() {
   if (!newTaskTitle.value.trim()) return
 
-  createTask({
-    title: newTaskTitle.value.trim(),
-    description: newTaskDescription.value.trim(),
-    projectId: props.projectId
-  })
+  try {
+    await createTask({
+      title: newTaskTitle.value.trim(),
+      description: newTaskDescription.value.trim(),
+      projectId: props.projectId
+    })
 
-  toast.add({ title: 'Task created', icon: 'i-lucide-check', color: 'success' })
-  newTaskTitle.value = ''
-  newTaskDescription.value = ''
-  showCreateModal.value = false
+    toast.add({ title: 'Task created', icon: 'i-lucide-check', color: 'success' })
+    newTaskTitle.value = ''
+    newTaskDescription.value = ''
+    showCreateModal.value = false
+  } catch {
+    toast.add({ title: 'Failed to create task', icon: 'i-lucide-x', color: 'error' })
+  }
 }
 
-function handleMoveTask(taskId: string) {
-  moveTask(taskId)
-  toast.add({ title: 'Task moved', icon: 'i-lucide-arrow-right', color: 'info' })
+async function handleMoveTask(taskId: string) {
+  try {
+    await moveTask(taskId)
+    toast.add({ title: 'Task moved', icon: 'i-lucide-arrow-right', color: 'info' })
+  } catch {
+    toast.add({ title: 'Failed to move task', icon: 'i-lucide-x', color: 'error' })
+  }
 }
 </script>
 
