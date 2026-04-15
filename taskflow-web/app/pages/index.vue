@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Project } from '~/types'
 import { useProjects } from '~/composables/useProjects'
 
 const { projects, loading, fetchProjects, createProject } = useProjects()
@@ -69,7 +70,7 @@ async function handleCreateProject() {
       <ProjectCard
         v-for="project in projects"
         :key="project.id"
-        :project="project"
+        :project="project as Project"
       />
     </div>
 

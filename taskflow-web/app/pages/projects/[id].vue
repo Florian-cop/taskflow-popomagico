@@ -1,19 +1,34 @@
 <script setup lang="ts">
-import { useProjects } from '~/composables/useProjects'
-import { useTasks } from '~/composables/useTasks'
+import type { Project, RealtimeEvent } from '~/types'
 
 const route = useRoute()
 const projectId = route.params.id as string
 
-const { getProject, fetchProjects } = useProjects()
+const { getProject, fetchProjects, refreshProject } = useProjects()
 const { fetchTasksByProject } = useTasks()
 
 const project = computed(() => getProject(projectId))
 
 onMounted(async () => {
-  await fetchProjects()
-  await fetchTasksByProject(projectId)
+  await Promise.all([
+    fetchProjects(),
+    fetchTasksByProject(projectId)
+  ])
 })
+
+function onRealtime(event: RealtimeEvent) {
+  // Les events métier transportent un projectId ; on ne réagit qu'à ceux du projet courant.
+  if (event.projectId !== projectId) return
+
+  if (event.type.startsWith('task.')) {
+    fetchTasksByProject(projectId)
+  }
+  if (event.type === 'member.added') {
+    refreshProject(projectId)
+  }
+}
+
+const { connected } = useRealtime(() => projectId, onRealtime)
 </script>
 
 <template>
@@ -45,12 +60,23 @@ onMounted(async () => {
         />
       </div>
 
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold">{{ project.name }}</h1>
-        <p v-if="project.description" class="mt-1 text-sm text-muted">
-          {{ project.description }}
-        </p>
+      <div class="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold">{{ project.name }}</h1>
+          <p v-if="project.description" class="mt-1 text-sm text-muted">
+            {{ project.description }}
+          </p>
+        </div>
+        <UBadge
+          :color="connected ? 'success' : 'neutral'"
+          :variant="connected ? 'subtle' : 'outline'"
+          :icon="connected ? 'i-lucide-radio' : 'i-lucide-radio-tower'"
+        >
+          {{ connected ? 'Temps réel' : 'Déconnecté' }}
+        </UBadge>
       </div>
+
+      <ProjectMembers :project="project as Project" />
 
       <KanbanBoard :project-id="projectId" />
     </template>

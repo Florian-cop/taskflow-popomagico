@@ -12,6 +12,7 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	APIPort    string
+	JWTSecret  string
 }
 
 // Load lit la configuration depuis les variables d'environnement.
@@ -23,6 +24,7 @@ func Load() *Config {
 		DBPassword: getEnv("DB_PASSWORD", "taskflow"),
 		DBName:     getEnv("DB_NAME", "taskflow"),
 		APIPort:    getEnv("API_PORT", "8080"),
+		JWTSecret:  getEnv("JWT_SECRET", "dev-secret-change-me"),
 	}
 }
 

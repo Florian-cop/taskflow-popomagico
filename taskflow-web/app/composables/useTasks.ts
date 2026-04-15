@@ -4,15 +4,12 @@ import { VALID_TRANSITIONS } from '~/types'
 export function useTasks() {
   const tasks = useState<Task[]>('tasks', () => [])
   const loading = useState<boolean>('tasks-loading', () => false)
-
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase as string
+  const api = useApi()
 
   async function fetchTasksByProject(projectId: string) {
     loading.value = true
     try {
-      const data = await $fetch<Task[]>(`${apiBase}/projects/${projectId}/tasks`)
-      // Replace tasks for this project
+      const data = await api<Task[]>(`/projects/${projectId}/tasks`)
       tasks.value = [
         ...tasks.value.filter(t => t.projectId !== projectId),
         ...(data ?? [])
@@ -35,20 +32,12 @@ export function useTasks() {
   }
 
   async function createTask(data: { title: string, description: string, projectId: string }) {
-    try {
-      const task = await $fetch<Task>(`${apiBase}/projects/${data.projectId}/tasks`, {
-        method: 'POST',
-        body: { title: data.title, description: data.description }
-      })
-
-      console.log('[TaskFlow] Task created:', task)
-
-      tasks.value.push(task)
-      return task
-    } catch (error) {
-      console.error('[TaskFlow] Failed to create task:', error)
-      throw error
-    }
+    const task = await api<Task>(`/projects/${data.projectId}/tasks`, {
+      method: 'POST',
+      body: { title: data.title, description: data.description }
+    })
+    tasks.value.push(task)
+    return task
   }
 
   async function moveTask(taskId: string) {
@@ -57,20 +46,13 @@ export function useTasks() {
     const next = VALID_TRANSITIONS[task.status]
     if (!next) return
 
-    try {
-      const updated = await $fetch<Task>(`${apiBase}/tasks/${taskId}/move`, {
-        method: 'PUT',
-        body: { status: next }
-      })
-
-      console.log('[TaskFlow] Task moved:', updated)
-
-      const idx = tasks.value.findIndex(t => t.id === taskId)
-      if (idx !== -1) tasks.value[idx] = updated
-    } catch (error) {
-      console.error('[TaskFlow] Failed to move task:', error)
-      throw error
-    }
+    const updated = await api<Task>(`/tasks/${taskId}/move`, {
+      method: 'PUT',
+      body: { status: next }
+    })
+    const idx = tasks.value.findIndex(t => t.id === taskId)
+    if (idx !== -1) tasks.value[idx] = updated
+    return updated
   }
 
   return {

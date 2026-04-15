@@ -8,6 +8,7 @@ import (
 
 	"taskflow-api/api/v1/dto"
 	"taskflow-api/internal/project/application"
+	sharedDomain "taskflow-api/internal/shared/domain"
 )
 
 type ProjectHandler struct {
@@ -55,10 +56,10 @@ func (h *ProjectHandler) CreateProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Phase 1 : utilisateur simulé via header X-User-Id
-	ownerID := r.Header.Get("X-User-Id")
-	if ownerID == "" {
-		ownerID = "default-user"
+	ownerID, ok := sharedDomain.UserIDFromContext(r.Context())
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
 	}
 
 	project, err := h.service.CreateProject(r.Context(), application.CreateProjectDTO{

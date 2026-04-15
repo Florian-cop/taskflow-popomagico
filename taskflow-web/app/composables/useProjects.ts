@@ -3,14 +3,12 @@ import type { Project } from '~/types'
 export function useProjects() {
   const projects = useState<Project[]>('projects', () => [])
   const loading = useState<boolean>('projects-loading', () => false)
-
-  const config = useRuntimeConfig()
-  const apiBase = config.public.apiBase as string
+  const api = useApi()
 
   async function fetchProjects() {
     loading.value = true
     try {
-      const data = await $fetch<Project[]>(`${apiBase}/projects`)
+      const data = await api<Project[]>('/projects')
       projects.value = data ?? []
     } catch (error) {
       console.error('[TaskFlow] Failed to fetch projects:', error)
@@ -20,39 +18,37 @@ export function useProjects() {
   }
 
   async function createProject(data: { name: string, description: string }) {
-    try {
-      const project = await $fetch<Project>(`${apiBase}/projects`, {
-        method: 'POST',
-        headers: { 'X-User-Id': 'user-1' },
-        body: { name: data.name, description: data.description }
-      })
-
-      console.log('[TaskFlow] Project created:', project)
-
-      projects.value.push(project)
-      return project
-    } catch (error) {
-      console.error('[TaskFlow] Failed to create project:', error)
-      throw error
-    }
+    const project = await api<Project>('/projects', {
+      method: 'POST',
+      body: { name: data.name, description: data.description }
+    })
+    projects.value.push(project)
+    return project
   }
 
   function getProject(id: string) {
     return projects.value.find(p => p.id === id)
   }
 
-  async function addMember(projectId: string, userId: string) {
-    try {
-      const project = await $fetch<Project>(`${apiBase}/projects/${projectId}/members`, {
-        method: 'POST',
-        body: { userId }
-      })
-      const idx = projects.value.findIndex(p => p.id === projectId)
-      if (idx !== -1) projects.value[idx] = project
-    } catch (error) {
-      console.error('[TaskFlow] Failed to add member:', error)
-      throw error
+  async function refreshProject(id: string) {
+    const fresh = await api<Project>(`/projects/${id}`)
+    const idx = projects.value.findIndex(p => p.id === id)
+    if (idx !== -1) {
+      projects.value[idx] = fresh
+    } else {
+      projects.value.push(fresh)
     }
+    return fresh
+  }
+
+  async function addMember(projectId: string, userId: string) {
+    const project = await api<Project>(`/projects/${projectId}/members`, {
+      method: 'POST',
+      body: { userId }
+    })
+    const idx = projects.value.findIndex(p => p.id === projectId)
+    if (idx !== -1) projects.value[idx] = project
+    return project
   }
 
   return {
@@ -61,6 +57,7 @@ export function useProjects() {
     fetchProjects,
     createProject,
     getProject,
+    refreshProject,
     addMember
   }
 }
