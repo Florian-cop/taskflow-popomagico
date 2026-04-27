@@ -83,13 +83,15 @@
 
 ### Checklist
 
-- [ ] WebSocket temps réel (déplacement de tâche visible par tous)
-- [ ] Notifications multi-canal extensibles (email + in-app)
-- [ ] Multi-tenant basique (workspaceId)
-- [ ] Docker Compose (production + staging)
-- [ ] `docker compose up` fonctionnel depuis un clone propre
+- [ ] Authentification JWT (inscription, connexion, token)
+- [ ] Temps réel sur le Kanban (déplacement de tâche visible par tous)
+- [ ] Notifications multi-canal extensibles (email + in-app) + préférences par canal
+- [ ] Audit trail automatique (qui a fait quoi et quand)
+- [ ] CLI d'administration (créer projet, créer tâche, seed de démo) — commande documentée dans le README
+- [ ] Docker Compose fonctionnel depuis un clone propre
+- [ ] `docker compose up` démarre tout avec un `.env.example` documenté
 - [ ] Pipeline CI GitHub Actions au vert
-- [ ] 3 nouveaux ADR (WebSocket, Notifications, Multi-tenant)
+- [ ] 4 nouveaux ADR (auth, temps réel, notifications, audit)
 - [ ] Schéma d'architecture mis à jour
 - [ ] Analyse d'impact : ce qui a changé vs ce qui n'a PAS changé
 - [ ] Tag `rendu-2` créé et poussé
@@ -109,10 +111,11 @@
 
 ### Checklist
 
-- [ ] Circuit breaker sur le canal email
+- [ ] Résilience des consommateurs d'événements (panne d'un canal sans impact sur les autres)
+- [ ] Dead-letter queue pour les messages non traités
 - [ ] API v1 + v2 coexistantes et rétrocompatibles
-- [ ] Audit trail automatique (qui a fait quoi et quand)
-- [ ] ADR résilience + versioning + audit
+- [ ] Multi-workspace (isolation des données par entreprise)
+- [ ] ADR résilience + versioning + multi-workspace
 - [ ] Tableau des scénarios de panne
 - [ ] Tag `rendu-3` créé et poussé
 
@@ -121,7 +124,7 @@
 | Scénario | Comportement attendu | Comportement constaté |
 |----------|----------------------|-----------------------|
 | Canal email indisponible | Le système continue, message mis en file | |
-| WebSocket coupé | Kanban fonctionnel en mode requête classique | |
+| Mécanisme temps réel coupé | Kanban fonctionnel en mode requête classique | |
 | | | |
 
 ### Analyse d'impact

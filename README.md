@@ -92,7 +92,7 @@ Quand quelque chose de significatif se produit dans le domaine, il n'appelle pas
 flowchart TD
     TS["TaskService\n(Use Case)"]
     BUS["Bus d'événements\ninterne"]
-    WS["WebSocketHandler\n→ temps réel"]
+    WS["RealtimeHandler\n→ temps réel"]
     NH["NotificationHandler\n→ email / in-app"]
     AH["AuditHandler\n→ traçabilité"]
 
@@ -106,7 +106,7 @@ flowchart TD
 
 | Sans events | Avec events |
 |------------|-------------|
-| `TaskService` appelle `NotificationService`, `WebSocketGateway`… | `TaskService` publie un event — il ne connaît rien d'autre |
+| `TaskService` appelle `NotificationService`, `RealtimeGateway`… | `TaskService` publie un event — il ne connaît rien d'autre |
 | Ajouter Slack = modifier `TaskService` | Ajouter Slack = créer `SlackHandler`, brancher sur le bus |
 | Tester `TaskService` = mocker chaque dépendance | Tester `TaskService` = vérifier qu'il publie le bon event |
 | Un handler qui plante peut casser tout le flux | Chaque handler est isolé — les autres continuent |
@@ -116,7 +116,7 @@ flowchart TD
 | Événement | Produit par | Consommé par |
 |-----------|------------|--------------|
 | `task.created` | `TaskService` | `NotificationHandler`, `AuditHandler` |
-| `task.moved` | `TaskService` | `WebSocketHandler`, `NotificationHandler`, `AuditHandler` |
+| `task.moved` | `TaskService` | `RealtimeHandler`, `NotificationHandler`, `AuditHandler` |
 | `task.assigned` | `TaskService` | `NotificationHandler`, `AuditHandler` |
 | `member.added` | `ProjectService` | `NotificationHandler`, `AuditHandler` |
 | `project.created` | `ProjectService` | `AuditHandler` |

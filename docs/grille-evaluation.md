@@ -28,7 +28,7 @@ Une couverture fonctionnelle incomplète mais portée par une architecture cohé
 | Critère | Détail | Points |
 |---------|--------|--------|
 | Capacité d'absorption sans réécriture | Les couches stables (domaine, services existants) n'ont pas été réécrites. L'analyse d'impact le démontre. | /5 |
-| Pattern notification extensible | L'ajout d'un nouveau canal ne modifie pas le service de notification existant (principe Open/Closed). | /5 |
+| Audit trail non-intrusif | L'audit est ajouté sans modifier la logique métier des services. Il se branche sur les domain events existants. | /5 |
 | Docker Compose fonctionnel | `docker compose up` depuis un clone propre démarre tous les services sans intervention manuelle. | /5 |
 | Pipeline CI/CD | La pipeline est verte sur `main`. Les tests et le build sont automatisés. | /5 |
 | **Total** | | **/20** |
@@ -39,8 +39,8 @@ Une couverture fonctionnelle incomplète mais portée par une architecture cohé
 
 | Critère | Détail | Points |
 |---------|--------|--------|
-| Résilience démontrée | La panne d'un canal n'arrête pas le système. La démonstration live le prouve. | /5 |
-| Audit trail non-intrusif | L'audit est ajouté sans modifier la logique métier des services (interceptor, decorator ou middleware). | /5 |
+| Résilience démontrée | La panne d'un canal n'arrête pas le système. Les messages échoués sont mis en file. La démonstration live le prouve. | /5 |
+| Multi-workspace | L'isolation des données entre workspaces est garantie par l'architecture (guard + scoping des repositories), pas uniquement côté frontend. | /5 |
 | API rétrocompatible | Les deux versions de l'API coexistent. Un client v1 fonctionne encore après l'ajout de la v2. | /5 |
 | Maturité globale | Cohérence de l'ensemble, qualité des ADR, test des scénarios de panne, maturité opérationnelle du système. | /5 |
 | **Total** | | **/20** |
