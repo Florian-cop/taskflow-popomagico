@@ -29,23 +29,24 @@ func NewAdminService(d *Dispatcher, failedRepo notifDomain.FailedNotificationRep
 }
 
 type FailedNotificationDTO struct {
-	ID             string
-	NotificationID string
-	UserID         string
-	Channel        string
-	Type           string
-	Title          string
-	Body           string
-	Error          string
-	RetryCount     int
-	Status         string
-	OccurredAt     string
-	LastRetriedAt  *string
+	ID             string  `json:"id"`
+	NotificationID string  `json:"notificationId"`
+	UserID         string  `json:"userId"`
+	Channel        string  `json:"channel"`
+	Type           string  `json:"type"`
+	Title          string  `json:"title"`
+	Body           string  `json:"body"`
+	Error          string  `json:"error"`
+	RetryCount     int     `json:"retryCount"`
+	Status         string  `json:"status"`
+	OccurredAt     string  `json:"occurredAt"`
+	LastRetriedAt  *string `json:"lastRetriedAt"`
 }
 
 type ChannelStatusDTO struct {
-	Name    string
-	Failing bool
+	Name       string `json:"name"`
+	Failing    bool   `json:"failing"`
+	Toggleable bool   `json:"toggleable"`
 }
 
 func (s *AdminService) ListFailed(ctx context.Context, limit int) ([]*FailedNotificationDTO, error) {
@@ -77,11 +78,12 @@ func (s *AdminService) RetryFailed(ctx context.Context, id string) error {
 func (s *AdminService) ListChannels() []*ChannelStatusDTO {
 	out := make([]*ChannelStatusDTO, 0, len(s.dispatcher.Channels()))
 	for _, c := range s.dispatcher.Channels() {
+		t, toggleable := s.toggles[c.Name()]
 		failing := false
-		if t, ok := s.toggles[c.Name()]; ok {
+		if toggleable {
 			failing = t.IsFailing()
 		}
-		out = append(out, &ChannelStatusDTO{Name: c.Name(), Failing: failing})
+		out = append(out, &ChannelStatusDTO{Name: c.Name(), Failing: failing, Toggleable: toggleable})
 	}
 	return out
 }

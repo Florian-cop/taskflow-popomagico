@@ -2,6 +2,7 @@
 const route = useRoute()
 const { projects } = useProjects()
 const { user, fullName, logout } = useAuth()
+const { version: apiVersion } = useApiVersion()
 const toast = useToast()
 
 const avatarText = computed(() => {
@@ -42,6 +43,7 @@ const userMenuItems = computed(() => [
   ],
   [
     { label: 'Préférences de notif.', icon: 'i-lucide-bell', to: '/settings/notifications' },
+    { label: 'Version d\'API', icon: 'i-lucide-git-branch', to: '/settings/api' },
     { label: 'Journal d\'audit', icon: 'i-lucide-scroll-text', to: '/audit' },
     { label: 'Admin résilience', icon: 'i-lucide-shield', to: '/admin/notifications' }
   ],
@@ -69,6 +71,17 @@ async function handleLogout() {
     <UBreadcrumb :items="breadcrumbs" class="hidden md:flex" />
 
     <template #right>
+      <UTooltip :text="`API ${apiVersion} active — cliquer pour changer`">
+        <UButton
+          to="/settings/api"
+          :color="apiVersion === 'v2' ? 'primary' : 'neutral'"
+          variant="soft"
+          size="xs"
+          class="font-mono"
+        >
+          API {{ apiVersion }}
+        </UButton>
+      </UTooltip>
       <UButton to="/audit" icon="i-lucide-scroll-text" color="neutral" variant="ghost" square aria-label="Audit" />
       <NotificationBell />
       <UColorModeButton />

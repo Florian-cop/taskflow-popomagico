@@ -1,6 +1,7 @@
 export interface ChannelStatus {
   name: string
   failing: boolean
+  toggleable: boolean
 }
 
 export interface FailedNotification {

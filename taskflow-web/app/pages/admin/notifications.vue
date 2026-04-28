@@ -85,13 +85,16 @@ function formatDate(iso: string): string {
               </p>
             </div>
           </div>
-          <div class="flex items-center gap-2">
+          <div v-if="channel.toggleable" class="flex items-center gap-2">
             <span class="text-xs text-muted">Simuler une panne</span>
             <USwitch
               :model-value="channel.failing"
               @update:model-value="(v: boolean) => toggleChannel(channel.name, v)"
             />
           </div>
+          <UBadge v-else size="xs" variant="subtle" color="neutral">
+            Toujours opérationnel
+          </UBadge>
         </li>
         <li v-if="channels.length === 0" class="py-4 text-center text-sm text-muted">
           Aucun canal toggleable.
