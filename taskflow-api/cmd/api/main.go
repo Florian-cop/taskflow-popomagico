@@ -11,6 +11,7 @@ import (
 
 	"taskflow-api/api/v1/handlers"
 	apiMiddleware "taskflow-api/api/v1/middleware"
+	v2handlers "taskflow-api/api/v2/handlers"
 	auditApp "taskflow-api/internal/audit/application"
 	auditInfra "taskflow-api/internal/audit/infrastructure"
 	notifApp "taskflow-api/internal/notification/application"
@@ -43,6 +44,7 @@ func main() {
 		&taskInfra.TaskModel{},
 		&notifInfra.NotificationModel{},
 		&notifInfra.PreferencesModel{},
+		&notifInfra.FailedNotificationModel{},
 		&auditInfra.AuditLogModel{},
 	)
 
@@ -81,15 +83,21 @@ func main() {
 	// 8. Notifications : canaux + dispatcher + event handlers
 	notifRepo := notifInfra.NewGormNotificationRepository(db)
 	prefsRepo := notifInfra.NewGormPreferencesRepository(db)
+	failedRepo := notifInfra.NewGormFailedNotificationRepository(db)
+
+	// Le canal email est wrappé dans un FaultInjectingChannel pour pouvoir simuler
+	// une panne via l'API admin (chantier 1 disruption #2).
+	emailToggle := notifInfra.NewFaultInjectingChannel(notifInfra.NewEmailChannel())
 	channels := []notifDomain.Channel{
-		notifInfra.NewEmailChannel(),
+		emailToggle,
 		notifInfra.NewInAppChannel(notifRepo),
 	}
-	dispatcher := notifApp.NewDispatcher(channels, prefsRepo)
+	dispatcher := notifApp.NewDispatcher(channels, prefsRepo, failedRepo)
 	memberFinder := notifInfra.NewProjectMemberFinder(projectService)
 	notifHandlers := notifInfra.NewEventHandlers(dispatcher, memberFinder)
 	notifHandlers.Register(eventBus)
 	notificationService := notifApp.NewNotificationService(notifRepo, prefsRepo)
+	adminService := notifApp.NewAdminService(dispatcher, failedRepo, emailToggle)
 
 	// 9. Audit : repository + service + event handler universel
 	auditRepo := auditInfra.NewGormAuditRepository(db)
@@ -108,6 +116,11 @@ func main() {
 	wsHandler := handlers.NewWebSocketHandler(wsBroadcaster, projectService, tokens)
 	notificationHandler := handlers.NewNotificationHandler(notificationService)
 	auditHandler := handlers.NewAuditHandler(auditService)
+	adminHandler := handlers.NewAdminHandler(adminService)
+
+	// Handlers v2 — consomment les MÊMES services applicatifs que v1.
+	v2ProjectHandler := v2handlers.NewProjectHandler(projectService)
+	v2TaskHandler := v2handlers.NewTaskHandler(taskService)
 
 	// 8. Routeur
 	r := chi.NewRouter()
@@ -150,6 +163,29 @@ func main() {
 			r.Put("/notifications/preferences", notificationHandler.UpdatePreferences)
 
 			r.Get("/audit/logs", auditHandler.Query)
+
+			// --- Admin (chantier 1 disruption #2 — résilience) ---
+			r.Get("/admin/notifications/channels", adminHandler.ListChannels)
+			r.Put("/admin/notifications/channels/{name}", adminHandler.SetChannelFailing)
+			r.Get("/admin/notifications/failed", adminHandler.ListFailed)
+			r.Post("/admin/notifications/failed/{id}/retry", adminHandler.RetryFailed)
+		})
+	})
+
+	// --- API v2 (chantier 2 disruption #2) ---
+	// Coexistence stricte avec v1 : mêmes services métier, présentation différenciée.
+	r.Route("/api/v2", func(r chi.Router) {
+		r.Group(func(r chi.Router) {
+			r.Use(apiMiddleware.JWTAuth(tokens))
+
+			r.Get("/projects", v2ProjectHandler.GetAll)
+			r.Post("/projects", v2ProjectHandler.Create)
+			r.Get("/projects/{id}", v2ProjectHandler.Get)
+			r.Post("/projects/{id}/members", v2ProjectHandler.AddMember)
+
+			r.Get("/projects/{id}/tasks", v2TaskHandler.ListByProject)
+			r.Post("/projects/{id}/tasks", v2TaskHandler.Create)
+			r.Put("/tasks/{id}/move", v2TaskHandler.Move)
 		})
 	})
 

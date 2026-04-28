@@ -26,6 +26,9 @@ const breadcrumbs = computed(() => {
   if (route.path.startsWith('/settings')) {
     items.push({ label: 'Paramètres', to: '/settings/notifications', icon: 'i-lucide-settings' })
   }
+  if (route.path.startsWith('/admin')) {
+    items.push({ label: 'Admin', to: '/admin/notifications', icon: 'i-lucide-shield' })
+  }
   return items
 })
 
@@ -39,7 +42,8 @@ const userMenuItems = computed(() => [
   ],
   [
     { label: 'Préférences de notif.', icon: 'i-lucide-bell', to: '/settings/notifications' },
-    { label: 'Journal d\'audit', icon: 'i-lucide-scroll-text', to: '/audit' }
+    { label: 'Journal d\'audit', icon: 'i-lucide-scroll-text', to: '/audit' },
+    { label: 'Admin résilience', icon: 'i-lucide-shield', to: '/admin/notifications' }
   ],
   [
     { label: 'Se déconnecter', icon: 'i-lucide-log-out', onSelect: handleLogout }

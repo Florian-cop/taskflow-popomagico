@@ -14,6 +14,13 @@ type PreferencesRepository interface {
 	Save(ctx context.Context, p *Preferences) error
 }
 
+type FailedNotificationRepository interface {
+	Save(ctx context.Context, f *FailedNotification) error
+	Update(ctx context.Context, f *FailedNotification) error
+	FindByID(ctx context.Context, id string) (*FailedNotification, error)
+	ListPending(ctx context.Context, limit int) ([]*FailedNotification, error)
+}
+
 // MemberFinder abstrait la lecture des membres d'un projet.
 // Permet au handler notification de ne pas dépendre du bounded context project.
 type MemberFinder interface {
