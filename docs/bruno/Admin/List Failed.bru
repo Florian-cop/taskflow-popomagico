@@ -1,0 +1,19 @@
+meta {
+  name: List Failed
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/admin/notifications/failed?limit=100
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 100
+}
+
+auth:bearer {
+  token: {{token}}
+}

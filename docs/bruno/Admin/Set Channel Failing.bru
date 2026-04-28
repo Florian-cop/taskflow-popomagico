@@ -1,0 +1,26 @@
+meta {
+  name: Set Channel Failing
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/admin/notifications/channels/email
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "failing": true
+  }
+}
+
+docs {
+  Permet de simuler une panne d'un canal de notification (chantier résilience).
+  Mettre `failing: false` pour rétablir le canal.
+}

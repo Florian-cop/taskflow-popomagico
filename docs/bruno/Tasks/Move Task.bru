@@ -1,0 +1,25 @@
+meta {
+  name: Move Task
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/tasks/{{taskId}}/move
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "status": "in_progress"
+  }
+}
+
+docs {
+  Statuts valides : `todo`, `in_progress`, `done`.
+}

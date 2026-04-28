@@ -1,0 +1,30 @@
+meta {
+  name: Query Audit Logs
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/audit/logs?limit=50
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 50
+  ~aggregateType: task
+  ~aggregateId:
+  ~userId:
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Filtres optionnels (décommenter dans `params:query`) :
+  - `aggregateType` : `task`, `project`, `user`, ...
+  - `aggregateId` : UUID de l'agrégat
+  - `userId` : UUID utilisateur
+  - `limit` : nb max d'entrées
+}

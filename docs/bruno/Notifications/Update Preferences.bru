@@ -1,0 +1,24 @@
+meta {
+  name: Update Preferences
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/notifications/preferences
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "enabled": {
+      "email": true,
+      "in_app": true
+    }
+  }
+}

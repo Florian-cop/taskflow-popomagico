@@ -1,0 +1,15 @@
+meta {
+  name: List Tasks (v2)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrlV2}}/projects/{{projectId}}/tasks
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

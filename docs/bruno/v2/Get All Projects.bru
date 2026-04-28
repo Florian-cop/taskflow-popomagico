@@ -1,0 +1,19 @@
+meta {
+  name: Get All Projects (v2)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrlV2}}/projects
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Réponse v2 enveloppée : `{ "data": [...], "meta": { "apiVersion": "v2", "generatedAt": "...", "count": N } }`
+}

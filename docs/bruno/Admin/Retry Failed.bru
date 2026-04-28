@@ -1,0 +1,23 @@
+meta {
+  name: Retry Failed
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/admin/notifications/failed/:id/retry
+  body: none
+  auth: bearer
+}
+
+params:path {
+  id:
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+docs {
+  Renseigner l'ID d'une notification échouée (récupéré via `List Failed`) dans le path param `id`.
+}

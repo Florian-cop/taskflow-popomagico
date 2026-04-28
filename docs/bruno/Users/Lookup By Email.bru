@@ -1,0 +1,19 @@
+meta {
+  name: Lookup By Email
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/users/by-email?email=alice@taskflow.dev
+  body: none
+  auth: bearer
+}
+
+params:query {
+  email: alice@taskflow.dev
+}
+
+auth:bearer {
+  token: {{token}}
+}

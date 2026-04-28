@@ -1,0 +1,22 @@
+meta {
+  name: Create Task (v2)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrlV2}}/projects/{{projectId}}/tasks
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "title": "Tâche créée via v2",
+    "description": "Description"
+  }
+}

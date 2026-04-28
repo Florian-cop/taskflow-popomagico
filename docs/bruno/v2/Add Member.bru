@@ -1,0 +1,21 @@
+meta {
+  name: Add Member (v2)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrlV2}}/projects/{{projectId}}/members
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "userId": "{{userId}}"
+  }
+}
